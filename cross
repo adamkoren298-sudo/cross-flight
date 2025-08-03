@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>חיפוש טיסות מישראל</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+      font-family: Arial, sans-serif;
+      background-image: url('https://images.unsplash.com/photo-1504198453319-5ce911bafcde?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      text-align: center;
+    }
+
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.6);
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 30px 10px;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+    }
+
+    .plane-icon {
+      width: 80px;
+      margin-bottom: 20px;
+      animation: fly 3s infinite ease-in-out;
+    }
+
+    @keyframes fly {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0); }
+    }
+
+    .search-box {
+      background-color: #ffffff22;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .search-box input, .search-box select {
+      padding: 10px;
+      width: 80%;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 10px;
+      font-size: 1em;
+    }
+
+    .search-box button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    .search-box button:hover {
+      background-color: #0056b3;
+    }
+
+    .destinations {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+
+    .destination {
+      background-color: #ffffff22;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-size: 1.2em;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .destination:hover {
+      background-color: #ffffff55;
+    }
+
+    .whatsapp-button {
+      background-color: #25D366;
+      color: white;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: background-color 0.3s;
+    }
+
+    .whatsapp-button:hover {
+      background-color: #1ebc59;
+    }
+
+    .results {
+      margin-top: 20px;
+    }
+
+    .ai-recommendation {
+      background-color: #ffffff22;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 30px;
+      width: 100%;
+      max-width: 500px;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <img src="https://cdn-icons-png.flaticon.com/512/681/681392.png" alt="מטוס" class="plane-icon">
+    <h1>חפש טיסות מישראל</h1>
+
+    <div class="search-box">
+      <input type="text" id="destination" placeholder="הכנס יעד לחיפוש...">
+      <br>
+      <label for="departure">תאריך יציאה:</label>
+      <input type="date" id="departure">
+      <br>
+      <label for="return">תאריך חזור:</label>
+      <input type="date" id="return">
+      <br>
+      <select id="preference">
+        <option value="price">המחיר הזול ביותר</option>
+        <option value="direct">טיסות ישירות</option>
+        <option value="fastest">הטיסה המהירה ביותר</option>
+      </select>
+      <br>
+      <button onclick="searchFlights()">חפש טיסה</button>
+    </div>
+
+    <div class="destinations">
+      <div class="destination">יוון</div>
+      <div class="destination">איטליה</div>
+      <div class="destination">קפריסין</div>
+    </div>
+
+    <div class="ai-recommendation">
+      <h3>איזה סגנון חופשה אתה מחפש?</h3>
+      <select id="tripStyle" onchange="getAIPrediction()">
+        <option value="">בחר סגנון...</option>
+        <option value="relax">חופשה רגועה</option>
+        <option value="adventure">הרפתקאות</option>
+        <option value="family">משפחתית</option>
+        <option value="romantic">רומנטית</option>
+      </select>
+      <p id="aiSuggestion" style="margin-top: 15px;"></p>
+    </div>
+
+    <div class="results" id="results"></div>
+
+    <a class="whatsapp-button" href="https://wa.me/972542985081" target="_blank">דבר איתנו בוואטסאפ</a>
+  </div>
+
+  <script>
+    function searchFlights() {
+      const destination = document.getElementById('destination').value;
+      const departureDate = document.getElementById('departure').value;
+      const returnDate = document.getElementById('return').value;
+      const preference = document.getElementById('preference').value;
+
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = `
+        <h2>תוצאות עבור ${destination} מ-${departureDate} עד ${returnDate}</h2>
+        <ul style="list-style: none; padding: 0;">
+          <li>טיסה ב-08:00 - ₪320 - ישירה</li>
+          <li>טיסה ב-14:00 - ₪280 - קונקשן 1</li>
+          <li>טיסה ב-20:00 - ₪390 - ישירה</li>
+        </ul>
+      `;
+    }
+
+    function getAIPrediction() {
+      const tripStyle = document.getElementById('tripStyle').value;
+      const suggestion = document.getElementById('aiSuggestion');
+      const preferences = {
+        relax: ["יוון", "כרתים", "קפריסין"],
+        adventure: ["שוויץ", "אוסטריה", "איסלנד"],
+        family: ["איטליה", "פריז", "אמסטרדם"],
+        romantic: ["סנטוריני", "ונציה", "מלטה"]
+      };
+
+      if (tripStyle && preferences[tripStyle]) {
+        const destinations = preferences[tripStyle];
+        suggestion.innerText = `לסגנון שבחרת אנו ממליצים לטוס ל-${destinations.join(", ")} בחודשים מאי עד ספטמבר, שם תוכל למצוא טיסות זולות ונעימות.`;
+      } else {
+        suggestion.innerText = '';
+      }
+    }
+  </script>
+</body>
+</html>
